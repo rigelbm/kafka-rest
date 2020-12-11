@@ -15,66 +15,66 @@
 version: "3.7"
 
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    hostname: zookeeper
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: "9091"
-      ZOOKEEPER_SERVER_ID: 1
-    ports:
-      - "9091:9091"
-
-  kafka-1:
-    image: confluentinc/cp-server:latest
-    hostname: kafka-1
-    container_name: kafka-1
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka-1:9191,EXTERNAL://localhost:9291"
-      KAFKA_BROKER_ID: 1
-      KAFKA_DELETE_TOPIC_ENABLE: "true"
-      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
-      KAFKA_LISTENERS: "INTERNAL://0.0.0.0:9191,EXTERNAL://0.0.0.0:9291"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:9091"
-    ports:
-      - "9291:9291"
-
-  kafka-2:
-    image: confluentinc/cp-server:latest
-    hostname: kafka-2
-    container_name: kafka-2
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka-2:9192,EXTERNAL://localhost:9292"
-      KAFKA_BROKER_ID: 2
-      KAFKA_DELETE_TOPIC_ENABLE: "true"
-      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
-      KAFKA_LISTENERS: "INTERNAL://0.0.0.0:9192,EXTERNAL://0.0.0.0:9292"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:9091"
-    ports:
-      - "9292:9292"
-
-  kafka-3:
-    image: confluentinc/cp-server:latest
-    hostname: kafka-3
-    container_name: kafka-3
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka-3:9193,EXTERNAL://localhost:9293"
-      KAFKA_BROKER_ID: 3
-      KAFKA_DELETE_TOPIC_ENABLE: "true"
-      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
-      KAFKA_LISTENERS: "INTERNAL://0.0.0.0:9193,EXTERNAL://0.0.0.0:9293"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:9091"
-    ports:
-      - "9293:9293"
+#  zookeeper:
+#    image: confluentinc/cp-zookeeper:latest
+#    hostname: zookeeper
+#    container_name: zookeeper
+#    environment:
+#      ZOOKEEPER_CLIENT_PORT: "9091"
+#      ZOOKEEPER_SERVER_ID: 1
+#    ports:
+#      - "9091:9091"
+#
+#  kafka-1:
+#    image: confluentinc/cp-server:latest
+#    hostname: kafka-1
+#    container_name: kafka-1
+#    depends_on:
+#      - zookeeper
+#    environment:
+#      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka-1:9191,EXTERNAL://localhost:9291"
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_DELETE_TOPIC_ENABLE: "true"
+#      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+#      KAFKA_LISTENERS: "INTERNAL://0.0.0.0:9191,EXTERNAL://0.0.0.0:9291"
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+#      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:9091"
+#    ports:
+#      - "9291:9291"
+#
+#  kafka-2:
+#    image: confluentinc/cp-server:latest
+#    hostname: kafka-2
+#    container_name: kafka-2
+#    depends_on:
+#      - zookeeper
+#    environment:
+#      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka-2:9192,EXTERNAL://localhost:9292"
+#      KAFKA_BROKER_ID: 2
+#      KAFKA_DELETE_TOPIC_ENABLE: "true"
+#      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+#      KAFKA_LISTENERS: "INTERNAL://0.0.0.0:9192,EXTERNAL://0.0.0.0:9292"
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+#      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:9091"
+#    ports:
+#      - "9292:9292"
+#
+#  kafka-3:
+#    image: confluentinc/cp-server:latest
+#    hostname: kafka-3
+#    container_name: kafka-3
+#    depends_on:
+#      - zookeeper
+#    environment:
+#      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka-3:9193,EXTERNAL://localhost:9293"
+#      KAFKA_BROKER_ID: 3
+#      KAFKA_DELETE_TOPIC_ENABLE: "true"
+#      KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+#      KAFKA_LISTENERS: "INTERNAL://0.0.0.0:9193,EXTERNAL://0.0.0.0:9293"
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+#      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:9091"
+#    ports:
+#      - "9293:9293"
 
   kafka-rest:
     build:
@@ -82,13 +82,42 @@ services:
       dockerfile: "testing/image/Dockerfile"
     hostname: kafka-rest
     container_name: kafka-rest
-    depends_on:
-      - zookeeper
-      - kafka-1
+#    depends_on:
+#      - zookeeper
+#      - kafka-1
     environment:
       KAFKA_REST_ADVERTISED_LISTENERS: "http://localhost:9391"
-      KAFKA_REST_BOOTSTRAP_SERVERS: "kafka-1:9191"
       KAFKA_REST_LISTENERS: "http://0.0.0.0:9391"
-      KAFKA_REST_ZOOKEEPER_CONNECT: "zookeeper:9091"
+      KAFKA_REST_HOST_NAME: "localhost"
+
+      KAFKA_REST_BOOTSTRAP_SERVERS: "pkc-41pov.centralus.azure.stag.cpdev.cloud:9092"
+      KAFKA_REST_SECURITY_PROTOCOL: "SASL_SSL"
+      KAFKA_REST_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required
+           username=\"XRTPVUS4NQHQP26T\"
+           password=\"GXLL89A7IBAYGEzvTN2LqFDJSqn5rT/bqv0+aPt+sLrPj1dlRe+Yo1OsSRQJHbn8\";"
+      KAFKA_REST_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
+      KAFKA_REST_SASL_MECHANISM: "PLAIN"
+      KAFKA_REST_CLIENT_DNS_LOOKUP: "use_all_dns_ips"
+
+      KAFKA_REST_CLIENT_BOOTSTRAP_SERVERS: "pkc-41pov.centralus.azure.stag.cpdev.cloud:9092"
+      KAFKA_REST_CLIENT_SECURITY_PROTOCOL: "SASL_SSL"
+      KAFKA_REST_CLIENT_SASL_JAAS_CONFIG: "org.apache.kafka.common.security.plain.PlainLoginModule required
+           username=\"XRTPVUS4NQHQP26T\"
+           password=\"GXLL89A7IBAYGEzvTN2LqFDJSqn5rT/bqv0+aPt+sLrPj1dlRe+Yo1OsSRQJHbn8\";"
+      KAFKA_REST_CLIENT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
+      KAFKA_REST_CLIENT_SASL_MECHANISM: "PLAIN"
+      KAFKA_REST_CLIENT_CLIENT_DNS_LOOKUP: "use_all_dns_ips"
+
+      KAFKA_REST_PRODUCER_ACKS: 0
+      KAFKA_REST_PRODUCER_BATCH_SIZE: 85600
+      KAFKA_REST_PRODUCER_COMPRESSION_TYPE: "lz4"
+
+      KAFKAREST_OPTS: "-Xms512m -Xmx512m"
+      JMX_PORT: 9392
+
+    cpu_count: 2
+    mem_reservation: 2048m
+    mem_limit: 2048m
     ports:
       - "9391:9391"
+      - "9392:9392"

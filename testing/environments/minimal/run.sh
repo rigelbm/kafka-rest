@@ -32,10 +32,15 @@ shift "$((OPTIND - 1))"
 env_dir=$(dirname "$0")
 base_dir=$env_dir/../../..
 
+# Login to nightly docker repository.
+aws ecr get-login-password --region us-west-2 \
+ | docker login --username AWS --password-stdin 368821881613.dkr.ecr.us-west-2.amazonaws.com/confluentinc/
+
+# Download latest cp-kafka-rest image.
+docker pull 368821881613.dkr.ecr.us-west-2.amazonaws.com/confluentinc/cp-kafka-rest:5.5.x-latest
+
 # Make sure kafka-rest is packaged.
-mvn -f "$base_dir"/kafka-rest-common/pom.xml          -Dmaven.test.skip=true install
-mvn -f "$base_dir"/kafka-rest-scala-consumer/pom.xml -Dmaven.test.skip=true install
-mvn -f "$base_dir"/kafka-rest/pom.xml                 -Dmaven.test.skip=true package
+mvn -f "$base_dir"/kafka-rest/pom.xml -Dmaven.test.skip=true clean package
 
 # For some reason `up --build --force-recreate` is not enough. Make sure everything is clean.
 docker-compose -f "$env_dir"/docker-compose.yml rm -fsv
