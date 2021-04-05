@@ -220,6 +220,10 @@ public final class KafkaBrokerFixture extends ExternalResource {
     return getClientConfigs();
   }
 
+  public Properties getProducerConfigs() {
+    return getClientConfigs();
+  }
+
   public static Builder builder() {
     return new Builder()
         .addUser("kafka", "kafka-pass")

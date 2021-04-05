@@ -33,8 +33,11 @@ import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider;
 import io.confluent.kafka.schemaregistry.rest.SchemaRegistryConfig;
 import io.confluent.kafka.schemaregistry.rest.SchemaRegistryRestApplication;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import io.confluent.kafka.serializers.json.KafkaJsonSchemaDeserializer;
+import io.confluent.kafka.serializers.json.KafkaJsonSchemaSerializer;
 import io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer;
+import io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
@@ -166,12 +169,37 @@ public final class SchemaRegistryFixture extends ExternalResource {
     return SchemaKey.create(subject, schemaId, schemaVersion);
   }
 
+  public ImmutableMap<String, String> getSerializerConfigs() {
+    return ImmutableMap.<String, String>builder()
+        .putAll(getClientConfigs())
+        .put("auto.register.schemas", "true")
+        .build();
+  }
+
+  public KafkaAvroSerializer createAvroSerializer(boolean isKey) {
+    KafkaAvroSerializer serializer = new KafkaAvroSerializer(client);
+    serializer.configure(getSerializerConfigs(), isKey);
+    return serializer;
+  }
+
   public KafkaAvroDeserializer createAvroDeserializer() {
     return new KafkaAvroDeserializer(client);
   }
 
+  public KafkaJsonSchemaSerializer<Object> createJsonSchemaSerializer(boolean isKey) {
+    KafkaJsonSchemaSerializer<Object> serializer = new KafkaJsonSchemaSerializer<>(client);
+    serializer.configure(getSerializerConfigs(), isKey);
+    return serializer;
+  }
+
   public KafkaJsonSchemaDeserializer<Object> createJsonSchemaDeserializer() {
     return new KafkaJsonSchemaDeserializer<>(client);
+  }
+
+  public KafkaProtobufSerializer<Message> createProtobufSerializer(boolean isKey) {
+    KafkaProtobufSerializer<Message> serializer = new KafkaProtobufSerializer<>(client);
+    serializer.configure(getSerializerConfigs(), isKey);
+    return serializer;
   }
 
   public KafkaProtobufDeserializer<Message> createProtobufDeserializer() {

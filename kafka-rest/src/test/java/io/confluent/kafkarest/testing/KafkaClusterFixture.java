@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.confluent.kafkarest.common.CompletableFutures;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -38,9 +39,15 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.record.TimestampType;
 import org.apache.kafka.common.security.auth.SecurityProtocol;
 import org.apache.kafka.common.serialization.Deserializer;
+import org.apache.kafka.common.serialization.Serializer;
 import org.junit.rules.ExternalResource;
 
 public final class KafkaClusterFixture extends ExternalResource {
@@ -125,6 +132,12 @@ public final class KafkaClusterFixture extends ExternalResource {
     return properties;
   }
 
+  private Properties getProducerConfigs() {
+    Properties properties = brokers.stream().findAny().get().getProducerConfigs();
+    properties.setProperty(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, getBootstrapServers());
+    return properties;
+  }
+
   public Admin getAdmin() {
     checkState(adminClient != null);
     return adminClient;
@@ -133,6 +146,11 @@ public final class KafkaClusterFixture extends ExternalResource {
   public <K, V> KafkaConsumer<K, V> getConsumer(
       Deserializer<K> keyDeserializer, Deserializer<V> valueDeserializer) {
     return new KafkaConsumer<>(getConsumerConfigs(), keyDeserializer, valueDeserializer);
+  }
+
+  public <V, K> KafkaProducer<K, V> getProducer(
+      Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    return new KafkaProducer<>(getProducerConfigs(), keySerializer, valueSerializer);
   }
 
   public String getClusterId() throws Exception {
@@ -155,6 +173,39 @@ public final class KafkaClusterFixture extends ExternalResource {
     ConsumerRecord<K, V> record = records.iterator().next();
     consumer.close();
     return record;
+  }
+
+  public <K, V> ConsumerRecord<K, V> createRecord(
+      String topicName,
+      int partitionId,
+      Serializer<K> keySerializer,
+      K key,
+      Serializer<V> valueSerializer,
+      V value,
+      Instant timestamp,
+      @Nullable Headers headers) throws Exception {
+    KafkaProducer<K, V> producer = getProducer(keySerializer, valueSerializer);
+    RecordMetadata metadata =
+        producer.send(
+            new ProducerRecord<>(
+                topicName,
+                partitionId,
+                timestamp.toEpochMilli(),
+                key,
+                value,
+                headers)).get();
+    producer.close();
+    return new ConsumerRecord<>(
+        topicName,
+        partitionId,
+        metadata.offset(),
+        metadata.timestamp(),
+        TimestampType.CREATE_TIME,
+        metadata.checksum(),
+        metadata.serializedKeySize(),
+        metadata.serializedValueSize(),
+        key,
+        value);
   }
 
   public void createTopic(String topicName, int numPartitions, short replicationFactor)
